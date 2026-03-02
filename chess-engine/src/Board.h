@@ -17,10 +17,12 @@ class Board {
 
         void initialize();
         void print() const;
-        
+
+        std::vector<Move> generatePawnMoves(int row, int col) const;
         std::vector<Move> generateAllMoves(PieceColor side) const;
         void makeMove(const Move& move);
         void showMoves(const std::vector<Move>& moves) const;
+
     private:
         std::array<std::array<Piece, 8>, 8> squares;
 };
