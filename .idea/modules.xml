@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/AstraChess.iml" filepath="$PROJECT_DIR$/.idea/AstraChess.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/AstraChess.CMake.iml" filepath="$PROJECT_DIR$/.idea/AstraChess.CMake.iml" />
     </modules>
   </component>
 </project>
