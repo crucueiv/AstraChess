@@ -16,11 +16,6 @@ int main() {
 
     board.print();
 
-    Move* move = new Move(1, 4, 3, 4);
-
-    board.makeMove(*move);
-
-    board.print();
 
     return 0;
 

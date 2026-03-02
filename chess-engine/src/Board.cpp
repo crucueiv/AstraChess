@@ -88,7 +88,7 @@ std::vector<Move> Board::generatePawnMoves(int row, int col) const {
 
     //Check diagonals for kill
     direction = (piece.color == PieceColor::White) ? 1 : -1;
-    if (nextRow >= 0 && nextRow < 8) {
+    if (nextRow >= 0 && nextRow < 8 && col + 1 < 8 && col - 1 >= 0) {
         if (squares[row+direction][col+direction].color != squares[row][col].color && squares[row+direction][col+direction].color != PieceColor::None) {
             moves.emplace_back(row, col, row+direction, col+direction);
         }
@@ -115,6 +115,6 @@ std::vector<Move> Board::generateAllMoves(PieceColor side) const {
 }
 
 void Board::makeMove(const Move &move) {
-    squares[move.toRow][move.toCol] = squares[move.fromRow][move.fromRow];
-    squares[move.fromRow][move.fromRow]= Piece();
+    squares[move.toRow][move.toCol] = squares[move.fromRow][move.fromCol];
+    squares[move.fromRow][move.fromCol]= Piece();
 }

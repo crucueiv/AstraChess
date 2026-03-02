@@ -8,3 +8,9 @@
 /dataSources.local.xml
 # Editor-based HTTP Client requests
 /httpRequests/
+# Local executable
+/chess-engine/src/programa.exe
+#Cmake build folder
+/build/
+# Old IDEA project files
+/.idea/
