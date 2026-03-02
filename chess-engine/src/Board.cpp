@@ -5,6 +5,7 @@
 #include "Board.h"
 #include "Piece.h"
 #include "movesetExpression.h"
+#include "pieceMoveset/pawn/pawnMoveset.h"
 #include <iostream>
 using namespace std;
 
@@ -49,67 +50,13 @@ void Board::print() const {
     }
 }
 
-//TODO: Refactor this to be more efficient and less redundant. Place everything in different files so it's easier to read.
-
-std::vector<Move> Board::generatePawnMoves(int row, int col) const {
-    std::vector<Move> moves;
-
-    Piece piece = squares[row][col];
-    if (piece.type != PieceType::Pawn) {
-        return moves;
-    }
-
-    int direction = (piece.color == PieceColor::White) ? 1 : -1;
-    int nextRow = row + direction;
-
-    //Moving forwards
-    if (nextRow >= 0 && nextRow < 8) {
-        if (squares[nextRow][col].type == PieceType::None) {
-            moves.emplace_back(row, col, nextRow, col);
-        }
-    }
-
-    //First move, two forwards
-    if (nextRow >= 0 && nextRow < 8) {
-        if (squares[row][col].color == PieceColor::White) {
-            if (row == 1) {
-                direction = 2;
-            }
-        }
-        else if (row == 6){
-            direction = -2;
-        }
-
-    }
-    nextRow = row + direction;
-
-    if (nextRow >= 0 && nextRow < 8) {
-        if (squares[nextRow][col].type == PieceType::None) {
-            moves.emplace_back(row, col, nextRow, col);
-        }
-    }
-
-    //Check diagonals for kill
-    direction = (piece.color == PieceColor::White) ? 1 : -1;
-    int captureRow = row + direction;
-    if (captureRow >= 0 && captureRow < 8) {
-        if (col - 1 >= 0 && squares[captureRow][col-1].color != piece.color && squares[captureRow][col-1].color != PieceColor::None) {
-            moves.emplace_back(row, col, captureRow, col-1);
-        }
-        if (col + 1 < 8 && squares[captureRow][col+1].color != piece.color && squares[captureRow][col+1].color != PieceColor::None) {
-            moves.emplace_back(row, col, captureRow, col+1);
-        }
-    }
-    return moves;
-}
-
 std::vector<Move> Board::generateAllMoves(PieceColor side) const {
     std::vector<Move> Allmoves;
     for (int row = 0; row < 8; row++) {
         for (int col = 0; col < 8; col++) {
             if (squares[row][col].color == side) {
                 if (squares[row][col].type == PieceType::Pawn) {
-                    auto pawnMoves = generatePawnMoves(row, col);
+                    auto pawnMoves = generatePawnMoves(*this, row, col);
                     Allmoves.insert(Allmoves.end(), pawnMoves.begin(), pawnMoves.end());
                 }
             }
@@ -136,4 +83,8 @@ void Board::showMoves(const std::vector<Move>& moves) const{
         std::cout << "From: (" <<  alphabetToChar(static_cast<alphabet>(move.fromCol)) << move.fromRow+1
         << ") To: ("  << alphabetToChar(static_cast<alphabet>(move.toCol)) << move.toRow+1 << ")\n";
     }
+}
+
+Piece Board::getSquare(int row, int col) const {
+    return squares[row][col];
 }
