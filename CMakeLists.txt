@@ -13,5 +13,4 @@ add_executable(AstraChess
         chess-engine/src/main.cpp
         chess-engine/src/Move.cpp
         chess-engine/src/Move.h
-        chess-engine/src/Piece.h
-        chess-engine/src/Board.cpp)
+        chess-engine/src/Piece.h)
