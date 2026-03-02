@@ -47,3 +47,38 @@ void Board::print() const {
         cout << endl;
     }
 }
+
+std::vector<Move> Board::generatePawnMoves(int row, int col) const {
+    std::vector<Move> moves;
+
+    Piece piece = squares[row][col];
+    if (piece.type() != PieceType::Pawn) {
+        return moves;
+    }
+
+    int direction = (piece.color() == PieceColor::White) ? 1 : -1;
+    int nextRow = row + direction;
+
+    //Moving forwards
+    if (nextRow >= 0 && nextRow < 8) {
+        if (squares[nextRow][col].type() == PieceType::None) {
+            moves.emplace_back(row, col, nextRow, col);
+        }
+    }
+    return moves;
+}
+
+std::vector<Move> Board::generateAllMoves(PieceColor side) const {
+    std::vector<Move> Allmoves;
+    for (int row = 0; row < 8; row++) {
+        for (int col = 0; col < 8; col++) {
+            if (squares[row][col].color == side) {
+                if (squares[row][col].type() == PieceType::Pawn) {
+                    auto pawnMoves = generatePawnMoves(row, col);
+                    Allmoves.insert(Allmoves.end(), pawnMoves.begin(), pawnMoves.end());
+                }
+            }
+        }
+    }
+    return Allmoves;
+}
