@@ -65,6 +65,26 @@ std::vector<Move> Board::generatePawnMoves(int row, int col) const {
             moves.emplace_back(row, col, nextRow, col);
         }
     }
+
+    //First move, two forwards
+    if (nextRow >= 0 && nextRow < 8) {
+        if (squares[row][col].color == PieceColor::White) {
+            if (row == 1) {
+                direction = 2;
+            }
+        }
+        else if (row == 6){
+            direction = -2;
+        }
+
+    }
+    nextRow = row + direction;
+
+    if (nextRow >= 0 && nextRow < 8) {
+        if (squares[nextRow][col].type == PieceType::None) {
+            moves.emplace_back(row, col, nextRow, col);
+        }
+    }
     return moves;
 }
 

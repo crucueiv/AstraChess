@@ -7,7 +7,7 @@
 int main() {
     Board board;
 
-    auto moves = board.generateAllMoves(PieceColor::Black);
+    auto moves = board.generateAllMoves(PieceColor::White);
 
     for (const auto& move : moves) {
         std::cout << "From: (" << move.fromRow << "," << move.fromCol
