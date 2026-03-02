@@ -14,6 +14,14 @@ int main() {
         << ") To: (" << move.toRow << "," << move.toCol << ")\n";
     }
 
+    board.print();
+
+    Move* move = new Move(1, 4, 3, 4);
+
+    board.makeMove(*move);
+
+    board.print();
+
     return 0;
 
 }

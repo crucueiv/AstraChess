@@ -85,6 +85,17 @@ std::vector<Move> Board::generatePawnMoves(int row, int col) const {
             moves.emplace_back(row, col, nextRow, col);
         }
     }
+
+    //Check diagonals for kill
+    direction = (piece.color == PieceColor::White) ? 1 : -1;
+    if (nextRow >= 0 && nextRow < 8) {
+        if (squares[row+direction][col+direction].color != squares[row][col].color && squares[row+direction][col+direction].color != PieceColor::None) {
+            moves.emplace_back(row, col, row+direction, col+direction);
+        }
+        if (squares[row+direction][col-direction].color != squares[row][col].color && squares[row+direction][col-direction].color != PieceColor::None) {
+            moves.emplace_back(row, col, row+direction, col-direction);
+        }
+    }
     return moves;
 }
 
