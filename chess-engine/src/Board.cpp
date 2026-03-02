@@ -4,6 +4,7 @@
 
 #include "Board.h"
 #include "Piece.h"
+#include "movesetExpression.h"
 #include <iostream>
 using namespace std;
 
@@ -48,6 +49,8 @@ void Board::print() const {
     }
 }
 
+//TODO: Refactor this to be more efficient and less redundant. Place everything in different files so it's easier to read.
+
 std::vector<Move> Board::generatePawnMoves(int row, int col) const {
     std::vector<Move> moves;
 
@@ -87,14 +90,42 @@ std::vector<Move> Board::generatePawnMoves(int row, int col) const {
     }
 
     //Check diagonals for kill
+    //TODO: Fix this part of the code as it's not getting right the moves to kill pieces.
     direction = (piece.color == PieceColor::White) ? 1 : -1;
-    if (nextRow >= 0 && nextRow < 8 && col + 1 < 8 && col - 1 >= 0) {
-        if (squares[row+direction][col+direction].color != squares[row][col].color && squares[row+direction][col+direction].color != PieceColor::None) {
-            moves.emplace_back(row, col, row+direction, col+direction);
+    if (nextRow >= 0 && nextRow < 8  && col - 1 >= 0 ) {
+        switch (squares[row][col].color) {
+            case PieceColor::White:
+                if(row + direction < 8) {
+                    if(col + direction < 8) {
+                        if (squares[row+direction][col+direction].color != squares[row][col].color && squares[row+direction][col+direction].color != PieceColor::None) {
+                            moves.emplace_back(row, col, row+direction, col+direction);
+                        }
+                    }
+                    if(col - direction >= 0) {
+                        if (squares[row+direction][col-direction].color != squares[row][col].color && squares[row+direction][col-direction].color != PieceColor::None) {
+                            moves.emplace_back(row, col, row+direction, col-direction);
+                        }
+                    }
+                }
+                break;
+            case PieceColor::Black:
+                if(row + direction >= 0) {
+                    if(col + direction >= 0) {
+                        if (squares[row+direction][col+direction].color != squares[row][col].color && squares[row+direction][col+direction].color != PieceColor::None) {
+                            moves.emplace_back(row, col, row+direction, col+direction);
+                        }
+                    }
+                    if(col - direction < 8) {
+                        if (squares[row+direction][col-direction].color != squares[row][col].color && squares[row+direction][col-direction].color != PieceColor::None) {
+                            moves.emplace_back(row, col, row+direction, col-direction);
+                        }
+                    }
+                }
+                break;
+            default:
+                break;
         }
-        if (squares[row+direction][col-direction].color != squares[row][col].color && squares[row+direction][col-direction].color != PieceColor::None) {
-            moves.emplace_back(row, col, row+direction, col-direction);
-        }
+        
     }
     return moves;
 }
@@ -115,6 +146,21 @@ std::vector<Move> Board::generateAllMoves(PieceColor side) const {
 }
 
 void Board::makeMove(const Move &move) {
-    squares[move.toRow][move.toCol] = squares[move.fromRow][move.fromCol];
-    squares[move.fromRow][move.fromCol]= Piece();
+
+    for (const auto& m : generateAllMoves(squares[move.fromRow][move.fromCol].color)) {
+        if (m == move) {
+            squares[move.toRow][move.toCol] = squares[move.fromRow][move.fromCol];
+            squares[move.fromRow][move.fromCol]= Piece();
+            return;
+        }
+    }
+    
+    
+}
+
+void Board::showMoves(const std::vector<Move>& moves) const{
+    for (const auto& move : moves) {
+        std::cout << "From: (" <<  alphabetToChar(static_cast<alphabet>(move.fromCol)) << move.fromRow+1
+        << ") To: ("  << alphabetToChar(static_cast<alphabet>(move.toCol)) << move.toRow+1 << ")\n";
+    }
 }
