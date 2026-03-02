@@ -74,6 +74,9 @@ void Board::makeMove(const Move &move) {
             return;
         }
     }
+
+    cout << "Invalid move: From (" << alphabetToChar(static_cast<alphabet>(move.fromCol)) << move.fromRow+1
+         << ") To ("  << alphabetToChar(static_cast<alphabet>(move.toCol)) << move.toRow+1 << ")\n";
     
     
 }

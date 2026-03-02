@@ -33,6 +33,11 @@ int main() {
 
     board.showMoves(moves);
 
+    board.makeMove(Move(3, 0, 4, 1));
+    board.print();
+
+    
+
     return 0;
 
 }
