@@ -2,7 +2,9 @@
 // Created by ivancc on 3/2/26.
 //
 
-#include "Board.cpp"
+#include "Board.h"
+#include <iostream>
+using namespace std;
 
 int main() {
     Board board;

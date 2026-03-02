@@ -1,0 +1,1 @@
+/tmp/codeql-scratch-f178dd1c3547d399/dbs/cpp/working/autobuild/bin/c++ -O3 -DNDEBUG -Wl,--dependency-file=CMakeFiles/AstraChess.dir/link.d "CMakeFiles/AstraChess.dir/chess-engine/src/Board.cpp.o" "CMakeFiles/AstraChess.dir/chess-engine/src/Engine.cpp.o" "CMakeFiles/AstraChess.dir/chess-engine/src/main.cpp.o" "CMakeFiles/AstraChess.dir/chess-engine/src/Move.cpp.o" -o AstraChess

@@ -90,42 +90,15 @@ std::vector<Move> Board::generatePawnMoves(int row, int col) const {
     }
 
     //Check diagonals for kill
-    //TODO: Fix this part of the code as it's not getting right the moves to kill pieces.
     direction = (piece.color == PieceColor::White) ? 1 : -1;
-    if (nextRow >= 0 && nextRow < 8  && col - 1 >= 0 ) {
-        switch (squares[row][col].color) {
-            case PieceColor::White:
-                if(row + direction < 8) {
-                    if(col + direction < 8) {
-                        if (squares[row+direction][col+direction].color != squares[row][col].color && squares[row+direction][col+direction].color != PieceColor::None) {
-                            moves.emplace_back(row, col, row+direction, col+direction);
-                        }
-                    }
-                    if(col - direction >= 0) {
-                        if (squares[row+direction][col-direction].color != squares[row][col].color && squares[row+direction][col-direction].color != PieceColor::None) {
-                            moves.emplace_back(row, col, row+direction, col-direction);
-                        }
-                    }
-                }
-                break;
-            case PieceColor::Black:
-                if(row + direction >= 0) {
-                    if(col + direction >= 0) {
-                        if (squares[row+direction][col+direction].color != squares[row][col].color && squares[row+direction][col+direction].color != PieceColor::None) {
-                            moves.emplace_back(row, col, row+direction, col+direction);
-                        }
-                    }
-                    if(col - direction < 8) {
-                        if (squares[row+direction][col-direction].color != squares[row][col].color && squares[row+direction][col-direction].color != PieceColor::None) {
-                            moves.emplace_back(row, col, row+direction, col-direction);
-                        }
-                    }
-                }
-                break;
-            default:
-                break;
+    int captureRow = row + direction;
+    if (captureRow >= 0 && captureRow < 8) {
+        if (col - 1 >= 0 && squares[captureRow][col-1].color != piece.color && squares[captureRow][col-1].color != PieceColor::None) {
+            moves.emplace_back(row, col, captureRow, col-1);
         }
-        
+        if (col + 1 < 8 && squares[captureRow][col+1].color != piece.color && squares[captureRow][col+1].color != PieceColor::None) {
+            moves.emplace_back(row, col, captureRow, col+1);
+        }
     }
     return moves;
 }
