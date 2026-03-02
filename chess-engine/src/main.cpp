@@ -6,6 +6,14 @@
 
 int main() {
     Board board;
-    board.print();
+
+    auto moves = board.generateAllMoves(PieceColor::Black);
+
+    for (const auto& move : moves) {
+        std::cout << "From: (" << move.fromRow << "," << move.fromCol
+        << ") To: (" << move.toRow << "," << move.toCol << ")\n";
+    }
+
     return 0;
+
 }

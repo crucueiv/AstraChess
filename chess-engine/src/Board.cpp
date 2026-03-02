@@ -52,16 +52,16 @@ std::vector<Move> Board::generatePawnMoves(int row, int col) const {
     std::vector<Move> moves;
 
     Piece piece = squares[row][col];
-    if (piece.type() != PieceType::Pawn) {
+    if (piece.type != PieceType::Pawn) {
         return moves;
     }
 
-    int direction = (piece.color() == PieceColor::White) ? 1 : -1;
+    int direction = (piece.color == PieceColor::White) ? 1 : -1;
     int nextRow = row + direction;
 
     //Moving forwards
     if (nextRow >= 0 && nextRow < 8) {
-        if (squares[nextRow][col].type() == PieceType::None) {
+        if (squares[nextRow][col].type == PieceType::None) {
             moves.emplace_back(row, col, nextRow, col);
         }
     }
@@ -73,7 +73,7 @@ std::vector<Move> Board::generateAllMoves(PieceColor side) const {
     for (int row = 0; row < 8; row++) {
         for (int col = 0; col < 8; col++) {
             if (squares[row][col].color == side) {
-                if (squares[row][col].type() == PieceType::Pawn) {
+                if (squares[row][col].type == PieceType::Pawn) {
                     auto pawnMoves = generatePawnMoves(row, col);
                     Allmoves.insert(Allmoves.end(), pawnMoves.begin(), pawnMoves.end());
                 }
@@ -81,4 +81,9 @@ std::vector<Move> Board::generateAllMoves(PieceColor side) const {
         }
     }
     return Allmoves;
+}
+
+void Board::makeMove(const Move &move) {
+    squares[move.toRow][move.toCol] = squares[move.fromRow][move.fromRow];
+    squares[move.fromRow][move.fromRow]= Piece();
 }

@@ -19,6 +19,7 @@ class Board {
         void print() const;
         std::vector<Move> generatePawnMoves(int row, int col) const;
         std::vector<Move> generateAllMoves(PieceColor side) const;
+        void makeMove(const Move& move);
     private:
         std::array<std::array<Piece, 8>, 8> squares;
 };
