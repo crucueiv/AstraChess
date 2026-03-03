@@ -17,7 +17,8 @@ class Board {
 
         void initialize();
         void print() const;
-
+        
+        std::vector<Move> getMovesForPiece(int row, int col) const;
         std::vector<Move> generateAllMoves(PieceColor side) const;
         Piece getSquare(int row, int col) const;
         void makeMove(const Move& move);

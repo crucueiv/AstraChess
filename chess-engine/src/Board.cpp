@@ -52,15 +52,55 @@ void Board::print() const {
     }
 }
 
+std::vector<Move> Board::getMovesForPiece(int row, int col) const {
+    std::vector<Move> moves;
+    
+    // Check if position is valid
+    if (row < 0 || row >= 8 || col < 0 || col >= 8) {
+        return moves;
+    }
+    
+    Piece piece = squares[row][col];
+    
+    // Check if there is a piece at this position
+    if (piece.type == PieceType::None) {
+        return moves;
+    }
+    
+    // Generate moves based on piece type
+    switch (piece.type) {
+        case PieceType::Pawn:
+            moves = generatePawnMoves(*this, row, col);
+            break;
+        case PieceType::Knight:
+            //moves = generateKnightMoves(*this, row, col);
+            break;
+        case PieceType::Bishop:
+            //moves = generateBishopMoves(*this, row, col);
+            break;
+        case PieceType::Rook:
+            //moves = generateRookMoves(*this, row, col);
+            break;
+        case PieceType::Queen:
+            //moves = generateQueenMoves(*this, row, col);
+            break;
+        case PieceType::King:
+            //moves = generateKingMoves(*this, row, col);
+            break;
+        default:
+            break;
+    }
+    
+    return moves;
+}
+
 std::vector<Move> Board::generateAllMoves(PieceColor side) const {
     std::vector<Move> Allmoves;
     for (int row = 0; row < 8; row++) {
         for (int col = 0; col < 8; col++) {
             if (squares[row][col].color == side) {
-                if (squares[row][col].type == PieceType::Pawn) {
-                    auto pawnMoves = generatePawnMoves(*this, row, col);
-                    Allmoves.insert(Allmoves.end(), pawnMoves.begin(), pawnMoves.end());
-                }
+                auto pieceMoves = getMovesForPiece(row, col);
+                Allmoves.insert(Allmoves.end(), pieceMoves.begin(), pieceMoves.end());
             }
         }
     }
