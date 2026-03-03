@@ -13,6 +13,7 @@
 #include "pieceMoveset/rook/rookMoveset.h"
 #include <iostream>
 #include <cmath>
+#include <stdexcept>
 using namespace std;
 
 namespace {
@@ -28,7 +29,7 @@ Board::Board(const BoardConfig& config) {
     int cols = config.cols > 0 ? config.cols : 8;
 
     squares.assign(rows, std::vector<Piece>(cols, Piece()));
-    tiles.assign(rows, std::vector<char>(cols, '.'));
+    tiles.assign(rows, std::vector<TileType>(cols, TileType::Empty));
     if (!config.tileLayout.empty() && static_cast<int>(config.tileLayout.size()) == rows) {
         bool valid = true;
         for (int r = 0; r < rows; r++) {
@@ -52,6 +53,36 @@ Board::Board(const BoardConfig& config) {
     blackKingSideRookMoved = false;
 
     initialize();
+}
+
+BoardConfig Board::fromJsonConfig(const BoardJsonConfig& jsonConfig) {
+    BoardConfig config;
+    config.rows = jsonConfig.rows > 0 ? jsonConfig.rows : 8;
+    config.cols = jsonConfig.cols > 0 ? jsonConfig.cols : 8;
+
+    if (jsonConfig.tileLayoutTokens.empty()) {
+        return config;
+    }
+
+    if (static_cast<int>(jsonConfig.tileLayoutTokens.size()) != config.rows) {
+        throw std::invalid_argument("BoardJsonConfig tileLayoutTokens row count mismatch.");
+    }
+
+    config.tileLayout.assign(config.rows, std::vector<TileType>(config.cols, TileType::Empty));
+    for (int row = 0; row < config.rows; row++) {
+        if (static_cast<int>(jsonConfig.tileLayoutTokens[row].size()) != config.cols) {
+            throw std::invalid_argument("BoardJsonConfig tileLayoutTokens column count mismatch.");
+        }
+        for (int col = 0; col < config.cols; col++) {
+            TileType tileType = TileType::Empty;
+            if (!tileTypeFromToken(jsonConfig.tileLayoutTokens[row][col], tileType)) {
+                throw std::invalid_argument("Unknown tile token in BoardJsonConfig.");
+            }
+            config.tileLayout[row][col] = tileType;
+        }
+    }
+
+    return config;
 }
 
 void Board::initialize() {
@@ -238,14 +269,14 @@ int Board::getColCount() const {
     return getRowCount() > 0 ? static_cast<int>(squares[0].size()) : 0;
 }
 
-char Board::getTileType(int row, int col) const {
+TileType Board::getTileType(int row, int col) const {
     if (row < 0 || row >= getRowCount() || col < 0 || col >= getColCount()) {
-        return '.';
+        return TileType::Empty;
     }
     return tiles[row][col];
 }
 
-void Board::setTileType(int row, int col, char tile) {
+void Board::setTileType(int row, int col, TileType tile) {
     if (row < 0 || row >= getRowCount() || col < 0 || col >= getColCount()) {
         return;
     }

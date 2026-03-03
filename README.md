@@ -48,9 +48,15 @@ ctest --test-dir cmake-build-debug --output-on-failure
 BoardConfig config;
 config.rows = 10;
 config.cols = 10;
-config.tileLayout = std::vector<std::vector<char>>(10, std::vector<char>(10, 'G'));
+config.tileLayout = std::vector<std::vector<TileType>>(10, std::vector<TileType>(10, TileType::Default));
 Board board(config);
 ```
+
+Tiles are now strongly typed via `TileType` (currently `Empty` and `Default`), so we can extend tile semantics later without using raw chars.
+
+### 1.1) Prepare for future `.json` board configs
+
+`BoardJsonConfig` and `Board::fromJsonConfig(...)` provide token-to-enum conversion seams (`"empty"` / `"default"`) for future JSON loading, while keeping the current constructor API intact.
 
 ### 2) Register a custom piece moveset
 
@@ -78,4 +84,5 @@ When editing rules, keep this order:
 
 - Improve modularity to support custom pieces without hard-coded dispatch
 - Support configurable board sizes/tiles beyond classic 8x8
+- Add direct board creation from `.json` definitions using `BoardJsonConfig`
 - Continue improving separation of rules, state, and move generation

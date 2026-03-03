@@ -143,15 +143,15 @@ TEST(Modularity, SupportsCustomBoardDimensionsAndTiles) {
     BoardConfig config;
     config.rows = 10;
     config.cols = 10;
-    config.tileLayout = std::vector<std::vector<char>>(10, std::vector<char>(10, 'G'));
-    config.tileLayout[0][0] = 'W';
+    config.tileLayout = std::vector<std::vector<TileType>>(10, std::vector<TileType>(10, TileType::Default));
+    config.tileLayout[0][0] = TileType::Empty;
 
     Board board(config);
     board.clearBoard();
     EXPECT_EQ(board.getRowCount(), 10);
     EXPECT_EQ(board.getColCount(), 10);
-    EXPECT_EQ(board.getTileType(0, 0), 'W');
-    EXPECT_EQ(board.getTileType(5, 5), 'G');
+    EXPECT_EQ(board.getTileType(0, 0), TileType::Empty);
+    EXPECT_EQ(board.getTileType(5, 5), TileType::Default);
 }
 
 TEST(Modularity, SupportsCustomPieceMoveGeneratorRegistration) {

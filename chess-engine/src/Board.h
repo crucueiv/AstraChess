@@ -6,6 +6,7 @@
 #define ASTRACHESS_BOARD_H
 #pragma once
 #include "Piece.h"
+#include "Tiles.h"
 #include <functional>
 #include <string>
 #include <unordered_map>
@@ -15,13 +16,20 @@
 struct BoardConfig {
     int rows = 8;
     int cols = 8;
-    std::vector<std::vector<char>> tileLayout;
+    std::vector<std::vector<TileType>> tileLayout;
+};
+
+struct BoardJsonConfig {
+    int rows = 8;
+    int cols = 8;
+    std::vector<std::vector<std::string>> tileLayoutTokens;
 };
 
 class Board {
     public:
         Board();
         explicit Board(const BoardConfig& config);
+        static BoardConfig fromJsonConfig(const BoardJsonConfig& jsonConfig);
 
         void initialize();
         void print() const;
@@ -33,8 +41,8 @@ class Board {
         void clearBoard();
         int getRowCount() const;
         int getColCount() const;
-        char getTileType(int row, int col) const;
-        void setTileType(int row, int col, char tile);
+        TileType getTileType(int row, int col) const;
+        void setTileType(int row, int col, TileType tile);
         void makeMove(const Move& move);
         void showMoves(const std::vector<Move>& moves) const;
         bool isSquareUnderAttack(int row, int col, PieceColor byColor) const;
@@ -51,7 +59,7 @@ class Board {
 
     private:
         std::vector<std::vector<Piece>> squares;
-        std::vector<std::vector<char>> tiles;
+        std::vector<std::vector<TileType>> tiles;
         std::unordered_map<std::string, std::function<std::vector<Move>(const Board&, int, int)>> customMoveGenerators;
         int enPassantTargetRow;
         int enPassantTargetCol;
