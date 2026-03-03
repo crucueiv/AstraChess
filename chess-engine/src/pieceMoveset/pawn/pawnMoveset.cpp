@@ -53,5 +53,18 @@ std::vector<Move> generatePawnMoves(const Board& board, int row, int col) {
             moves.emplace_back(row, col, captureRow, col+1);
         }
     }
+    
+    // En passant capture
+    int enPassantRow = board.getEnPassantTargetRow();
+    int enPassantCol = board.getEnPassantTargetCol();
+    if (enPassantRow != -1 && enPassantCol != -1) {
+        // Check if we can capture en passant
+        if (captureRow == enPassantRow) {
+            if (col - 1 == enPassantCol || col + 1 == enPassantCol) {
+                moves.emplace_back(row, col, enPassantRow, enPassantCol);
+            }
+        }
+    }
+    
     return moves;
 }

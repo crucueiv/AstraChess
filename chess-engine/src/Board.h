@@ -22,9 +22,15 @@ class Board {
         Piece getSquare(int row, int col) const;
         void makeMove(const Move& move);
         void showMoves(const std::vector<Move>& moves) const;
+        
+        // En passant methods
+        int getEnPassantTargetRow() const;
+        int getEnPassantTargetCol() const;
 
     private:
         std::array<std::array<Piece, 8>, 8> squares;
+        int enPassantTargetRow;
+        int enPassantTargetCol;
 };
 
 

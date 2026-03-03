@@ -10,6 +10,8 @@
 using namespace std;
 
 Board::Board() {
+    enPassantTargetRow = -1;
+    enPassantTargetCol = -1;
     initialize();
 }
 
@@ -69,8 +71,31 @@ void Board::makeMove(const Move &move) {
 
     for (const auto& m : generateAllMoves(squares[move.fromRow][move.fromCol].color)) {
         if (m == move) {
-            squares[move.toRow][move.toCol] = squares[move.fromRow][move.fromCol];
-            squares[move.fromRow][move.fromCol]= Piece();
+            Piece movingPiece = squares[move.fromRow][move.fromCol];
+            
+            // Check if this is an en passant capture
+            if (movingPiece.type == PieceType::Pawn && 
+                move.toRow == enPassantTargetRow && 
+                move.toCol == enPassantTargetCol) {
+                // Remove the captured pawn
+                int capturedPawnRow = (movingPiece.color == PieceColor::White) ? move.toRow - 1 : move.toRow + 1;
+                squares[capturedPawnRow][move.toCol] = Piece();
+            }
+            
+            // Make the move
+            squares[move.toRow][move.toCol] = movingPiece;
+            squares[move.fromRow][move.fromCol] = Piece();
+            
+            // Update en passant target if pawn moved two squares
+            if (movingPiece.type == PieceType::Pawn && abs(move.toRow - move.fromRow) == 2) {
+                enPassantTargetRow = (move.fromRow + move.toRow) / 2;
+                enPassantTargetCol = move.fromCol;
+            } else {
+                // Clear en passant target for any other move
+                enPassantTargetRow = -1;
+                enPassantTargetCol = -1;
+            }
+            
             return;
         }
     }
@@ -90,4 +115,12 @@ void Board::showMoves(const std::vector<Move>& moves) const{
 
 Piece Board::getSquare(int row, int col) const {
     return squares[row][col];
+}
+
+int Board::getEnPassantTargetRow() const {
+    return enPassantTargetRow;
+}
+
+int Board::getEnPassantTargetCol() const {
+    return enPassantTargetCol;
 }
