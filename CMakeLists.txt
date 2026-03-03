@@ -10,6 +10,7 @@ add_executable(AstraChess
     chess-engine/src/Move.cpp
     chess-engine/src/pieceMoveset/pawn/pawnMoveset.cpp
     chess-engine/src/pieceMoveset/bishop/bishopMoveset.cpp
+    chess-engine/src/pieceMoveset/knight/knightMoveset.cpp
 )
 
 target_include_directories(AstraChess PRIVATE

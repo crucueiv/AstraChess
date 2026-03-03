@@ -7,6 +7,7 @@
 #include "movesetExpression.h"
 #include "pieceMoveset/pawn/pawnMoveset.h"
 #include "pieceMoveset/bishop/bishopMoveset.h"
+#include "pieceMoveset/knight/knightMoveset.h"
 #include <iostream>
 using namespace std;
 
@@ -74,7 +75,7 @@ std::vector<Move> Board::getMovesForPiece(int row, int col) const {
             moves = generatePawnMoves(*this, row, col);
             break;
         case PieceType::Knight:
-            //moves = generateKnightMoves(*this, row, col);
+            moves = generateKnightMoves(*this, row, col);
             break;
         case PieceType::Bishop:
             moves = generateBishopMoves(*this, row, col);
