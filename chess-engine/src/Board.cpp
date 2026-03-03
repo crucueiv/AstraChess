@@ -34,29 +34,31 @@ Board::Board() {
 }
 
 void Board::initialize() {
-    //Pawns
+    // Standard chess initial placement.
+    // White starts on rows 0-1, black on rows 6-7 in this coordinate system.
+    // Pawns
     for (int i = 0; i < 8; i++) {
         squares[1][i] = Piece(PieceType::Pawn, PieceColor::White);
         squares[6][i] = Piece(PieceType::Pawn, PieceColor::Black);
     }
 
-    //Rooks
+    // Rooks
     squares[0][0] = squares[0][7] = Piece(PieceType::Rook, PieceColor::White);
     squares[7][0] = squares[7][7] = Piece(PieceType::Rook, PieceColor::Black);
 
-    //Knights
+    // Knights
     squares[0][1] = squares[0][6] = Piece(PieceType::Knight, PieceColor::White);
     squares[7][1] = squares[7][6] = Piece(PieceType::Knight, PieceColor::Black);
 
-    //Bishops
+    // Bishops
     squares[0][2] = squares[0][5] = Piece(PieceType::Bishop, PieceColor::White);
     squares[7][2] = squares[7][5] = Piece(PieceType::Bishop, PieceColor::Black);
 
-    //Queens
+    // Queens
     squares[0][3] = Piece(PieceType::Queen, PieceColor::White);
     squares[7][3] = Piece(PieceType::Queen, PieceColor::Black);
 
-    //Kings
+    // Kings
     squares[0][4] = Piece(PieceType::King, PieceColor::White);
     squares[7][4] = Piece(PieceType::King, PieceColor::Black);
 }
@@ -175,6 +177,8 @@ void Board::clearBoard() {
 }
 
 bool Board::isSquareUnderAttack(int row, int col, PieceColor byColor) const {
+    // This helper checks pseudo-attacks by piece patterns to answer
+    // "is this square controlled by the given side?".
     int pawnDirection = (byColor == PieceColor::White) ? 1 : -1;
     int pawnRow = row - pawnDirection;
     if (pawnRow >= 0 && pawnRow < 8) {
@@ -287,6 +291,7 @@ bool Board::isCheckmate(PieceColor color) const {
 }
 
 bool Board::wouldLeaveKingInCheck(const Move& move, PieceColor movingSide) const {
+    // Validate candidate moves by simulation on a board copy.
     Board copy = *this;
     copy.applyMoveUnchecked(move);
     return copy.isKingInCheck(movingSide);
@@ -349,6 +354,7 @@ bool Board::canCastleQueenSide(PieceColor color) const {
 }
 
 void Board::applyMoveUnchecked(const Move& move) {
+    // Internal move application used after move validity has already been checked.
     Piece movingPiece = squares[move.fromRow][move.fromCol];
     Piece capturedPiece = squares[move.toRow][move.toCol];
 
