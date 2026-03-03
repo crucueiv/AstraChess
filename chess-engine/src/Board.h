@@ -23,6 +23,11 @@ class Board {
         Piece getSquare(int row, int col) const;
         void makeMove(const Move& move);
         void showMoves(const std::vector<Move>& moves) const;
+        bool isSquareUnderAttack(int row, int col, PieceColor byColor) const;
+        bool isKingInCheck(PieceColor color) const;
+        bool wouldLeaveKingInCheck(const Move& move, PieceColor movingSide) const;
+        bool canCastleKingSide(PieceColor color) const;
+        bool canCastleQueenSide(PieceColor color) const;
         
         // En passant methods
         int getEnPassantTargetRow() const;
@@ -32,6 +37,13 @@ class Board {
         std::array<std::array<Piece, 8>, 8> squares;
         int enPassantTargetRow;
         int enPassantTargetCol;
+        bool whiteKingMoved;
+        bool blackKingMoved;
+        bool whiteQueenSideRookMoved;
+        bool whiteKingSideRookMoved;
+        bool blackQueenSideRookMoved;
+        bool blackKingSideRookMoved;
+        void applyMoveUnchecked(const Move& move);
 };
 
 
