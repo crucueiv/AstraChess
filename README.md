@@ -86,3 +86,5 @@ When editing rules, keep this order:
 - Support configurable board sizes/tiles beyond classic 8x8
 - Add direct board creation from `.json` definitions using `BoardJsonConfig`
 - Continue improving separation of rules, state, and move generation
+- Deploy the project on a website in the future
+- Integrate multiplayer in the future using `serg-cs/arcade-link` alongside the single-player AI mode
