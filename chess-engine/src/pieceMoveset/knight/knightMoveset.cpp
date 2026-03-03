@@ -24,7 +24,10 @@ std::vector<Move> generateKnightMoves(const Board& board, int row, int col) {
         if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
             Piece targetPiece = board.getSquare(newRow, newCol);
             if (targetPiece.color != piece.color) {
-                moves.emplace_back(row, col, newRow, newCol);
+                Move move(row, col, newRow, newCol);
+                if (!board.wouldLeaveKingInCheck(move, piece.color)) {
+                    moves.push_back(move);
+                }
             }
         }
     }

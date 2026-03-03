@@ -21,10 +21,13 @@ class Board {
         std::vector<Move> getMovesForPiece(int row, int col) const;
         std::vector<Move> generateAllMoves(PieceColor side) const;
         Piece getSquare(int row, int col) const;
+        void setSquare(int row, int col, const Piece& piece);
+        void clearBoard();
         void makeMove(const Move& move);
         void showMoves(const std::vector<Move>& moves) const;
         bool isSquareUnderAttack(int row, int col, PieceColor byColor) const;
         bool isKingInCheck(PieceColor color) const;
+        bool isCheckmate(PieceColor color) const;
         bool wouldLeaveKingInCheck(const Move& move, PieceColor movingSide) const;
         bool canCastleKingSide(PieceColor color) const;
         bool canCastleQueenSide(PieceColor color) const;

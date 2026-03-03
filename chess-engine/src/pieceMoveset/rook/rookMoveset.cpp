@@ -24,10 +24,16 @@ std::vector<Move> generateRookMoves(const Board& board, int row, int col) {
         while (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
             Piece targetPiece = board.getSquare(newRow, newCol);
             if (targetPiece.type == PieceType::None) {
-                moves.emplace_back(row, col, newRow, newCol);
+                Move move(row, col, newRow, newCol);
+                if (!board.wouldLeaveKingInCheck(move, piece.color)) {
+                    moves.push_back(move);
+                }
             } else {
                 if (targetPiece.color != piece.color) {
-                    moves.emplace_back(row, col, newRow, newCol);
+                    Move move(row, col, newRow, newCol);
+                    if (!board.wouldLeaveKingInCheck(move, piece.color)) {
+                        moves.push_back(move);
+                    }
                 }
                 break; // Stop in this direction if we hit a piece
             }

@@ -151,6 +151,29 @@ Piece Board::getSquare(int row, int col) const {
     return squares[row][col];
 }
 
+void Board::setSquare(int row, int col, const Piece& piece) {
+    if (row < 0 || row >= 8 || col < 0 || col >= 8) {
+        return;
+    }
+    squares[row][col] = piece;
+}
+
+void Board::clearBoard() {
+    for (int row = 0; row < 8; row++) {
+        for (int col = 0; col < 8; col++) {
+            squares[row][col] = Piece();
+        }
+    }
+    enPassantTargetRow = -1;
+    enPassantTargetCol = -1;
+    whiteKingMoved = true;
+    blackKingMoved = true;
+    whiteQueenSideRookMoved = true;
+    whiteKingSideRookMoved = true;
+    blackQueenSideRookMoved = true;
+    blackKingSideRookMoved = true;
+}
+
 bool Board::isSquareUnderAttack(int row, int col, PieceColor byColor) const {
     int pawnDirection = (byColor == PieceColor::White) ? 1 : -1;
     int pawnRow = row - pawnDirection;
@@ -255,6 +278,14 @@ bool Board::isKingInCheck(PieceColor color) const {
     return false;
 }
 
+bool Board::isCheckmate(PieceColor color) const {
+    if (!isKingInCheck(color)) {
+        return false;
+    }
+    auto moves = generateAllMoves(color);
+    return moves.empty();
+}
+
 bool Board::wouldLeaveKingInCheck(const Move& move, PieceColor movingSide) const {
     Board copy = *this;
     copy.applyMoveUnchecked(move);
@@ -349,6 +380,13 @@ void Board::applyMoveUnchecked(const Move& move) {
 
     squares[move.toRow][move.toCol] = movingPiece;
     squares[move.fromRow][move.fromCol] = Piece();
+
+    if (movingPiece.type == PieceType::Pawn) {
+        if ((movingPiece.color == PieceColor::White && move.toRow == 7) ||
+            (movingPiece.color == PieceColor::Black && move.toRow == 0)) {
+            squares[move.toRow][move.toCol] = Piece(PieceType::Queen, movingPiece.color);
+        }
+    }
 
     if (movingPiece.type == PieceType::King) {
         if (movingPiece.color == PieceColor::White) {

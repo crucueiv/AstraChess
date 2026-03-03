@@ -15,42 +15,43 @@ std::vector<Move> generatePawnMoves(const Board& board, int row, int col) {
     int direction = (piece.color == PieceColor::White) ? 1 : -1;
     int nextRow = row + direction;
 
-    //Moving forwards
+    // Moving one square forward
     if (nextRow >= 0 && nextRow < 8) {
         if (board.getSquare(nextRow, col).type == PieceType::None) {
-            moves.emplace_back(row, col, nextRow, col);
-        }
-    }
-
-    //First move, two forwards
-    if (nextRow >= 0 && nextRow < 8) {
-        if (board.getSquare(row, col).color == PieceColor::White) {
-            if (row == 1) {
-                direction = 2;
+            Move move(row, col, nextRow, col);
+            if (!board.wouldLeaveKingInCheck(move, piece.color)) {
+                moves.push_back(move);
             }
         }
-        else if (row == 6){
-            direction = -2;
+        
+        // First move, two squares forward (only if one-square path is clear)
+        int startRow = (piece.color == PieceColor::White) ? 1 : 6;
+        if (row == startRow) {
+            int twoStepRow = row + 2 * direction;
+            if (twoStepRow >= 0 && twoStepRow < 8 &&
+                board.getSquare(twoStepRow, col).type == PieceType::None) {
+                Move twoStep(row, col, twoStepRow, col);
+                if (!board.wouldLeaveKingInCheck(twoStep, piece.color)) {
+                    moves.push_back(twoStep);
+                }
+            }
         }
-
-    }
-    nextRow = row + direction;
-
-    if (nextRow >= 0 && nextRow < 8) {
-        if (board.getSquare(nextRow, col).type == PieceType::None) {
-            moves.emplace_back(row, col, nextRow, col);
-        }
     }
 
-    //Check diagonals for kill
-    direction = (piece.color == PieceColor::White) ? 1 : -1;
+    // Check diagonals for capture
     int captureRow = row + direction;
     if (captureRow >= 0 && captureRow < 8) {
         if (col - 1 >= 0 && board.getSquare(captureRow, col-1).color != piece.color && board.getSquare(captureRow, col-1).color != PieceColor::None) {
-            moves.emplace_back(row, col, captureRow, col-1);
+            Move move(row, col, captureRow, col-1);
+            if (!board.wouldLeaveKingInCheck(move, piece.color)) {
+                moves.push_back(move);
+            }
         }
         if (col + 1 < 8 && board.getSquare(captureRow, col+1).color != piece.color && board.getSquare(captureRow, col+1).color != PieceColor::None) {
-            moves.emplace_back(row, col, captureRow, col+1);
+            Move move(row, col, captureRow, col+1);
+            if (!board.wouldLeaveKingInCheck(move, piece.color)) {
+                moves.push_back(move);
+            }
         }
     }
     
@@ -58,10 +59,12 @@ std::vector<Move> generatePawnMoves(const Board& board, int row, int col) {
     int enPassantRow = board.getEnPassantTargetRow();
     int enPassantCol = board.getEnPassantTargetCol();
     if (enPassantRow != -1 && enPassantCol != -1) {
-        // Check if we can capture en passant
         if (captureRow == enPassantRow) {
             if (col - 1 == enPassantCol || col + 1 == enPassantCol) {
-                moves.emplace_back(row, col, enPassantRow, enPassantCol);
+                Move move(row, col, enPassantRow, enPassantCol);
+                if (!board.wouldLeaveKingInCheck(move, piece.color)) {
+                    moves.push_back(move);
+                }
             }
         }
     }

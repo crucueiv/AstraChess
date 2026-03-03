@@ -27,10 +27,16 @@ std::vector<Move> generateBishopMoves(const Board& board, int row, int col) {
             Piece target = board.getSquare(currentRow, currentCol);
 
             if (target.type == PieceType::None) {
-                moves.emplace_back(row, col, currentRow, currentCol);
+                Move move(row, col, currentRow, currentCol);
+                if (!board.wouldLeaveKingInCheck(move, piece.color)) {
+                    moves.push_back(move);
+                }
             } else {
                 if (target.color != piece.color) {
-                    moves.emplace_back(row, col, currentRow, currentCol);
+                    Move move(row, col, currentRow, currentCol);
+                    if (!board.wouldLeaveKingInCheck(move, piece.color)) {
+                        moves.push_back(move);
+                    }
                 }
                 break;
             }
