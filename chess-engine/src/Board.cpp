@@ -16,12 +16,32 @@
 using namespace std;
 
 namespace {
-    PieceColor oppositeColor(PieceColor color) {
-        return color == PieceColor::White ? PieceColor::Black : PieceColor::White;
-    }
+PieceColor oppositeColor(PieceColor color) {
+    return color == PieceColor::White ? PieceColor::Black : PieceColor::White;
+}
 }
 
-Board::Board() {
+Board::Board() : Board(BoardConfig{}) {}
+
+Board::Board(const BoardConfig& config) {
+    int rows = config.rows > 0 ? config.rows : 8;
+    int cols = config.cols > 0 ? config.cols : 8;
+
+    squares.assign(rows, std::vector<Piece>(cols, Piece()));
+    tiles.assign(rows, std::vector<char>(cols, '.'));
+    if (!config.tileLayout.empty() && static_cast<int>(config.tileLayout.size()) == rows) {
+        bool valid = true;
+        for (int r = 0; r < rows; r++) {
+            if (static_cast<int>(config.tileLayout[r].size()) != cols) {
+                valid = false;
+                break;
+            }
+        }
+        if (valid) {
+            tiles = config.tileLayout;
+        }
+    }
+
     enPassantTargetRow = -1;
     enPassantTargetCol = -1;
     whiteKingMoved = false;
@@ -30,42 +50,60 @@ Board::Board() {
     whiteKingSideRookMoved = false;
     blackQueenSideRookMoved = false;
     blackKingSideRookMoved = false;
+
     initialize();
 }
 
 void Board::initialize() {
-    // Standard chess initial placement.
-    // White starts on rows 0-1, black on rows 6-7 in this coordinate system.
+    clearBoard();
+
+    // Standard chess initial placement if board can hold classic setup.
+    if (getRowCount() < 8 || getColCount() < 8) {
+        return;
+    }
+
+    int whiteBackRow = 0;
+    int whitePawnRow = 1;
+    int blackPawnRow = getRowCount() - 2;
+    int blackBackRow = getRowCount() - 1;
+
     // Pawns
     for (int i = 0; i < 8; i++) {
-        squares[1][i] = Piece(PieceType::Pawn, PieceColor::White);
-        squares[6][i] = Piece(PieceType::Pawn, PieceColor::Black);
+        squares[whitePawnRow][i] = Piece(PieceType::Pawn, PieceColor::White);
+        squares[blackPawnRow][i] = Piece(PieceType::Pawn, PieceColor::Black);
     }
 
     // Rooks
-    squares[0][0] = squares[0][7] = Piece(PieceType::Rook, PieceColor::White);
-    squares[7][0] = squares[7][7] = Piece(PieceType::Rook, PieceColor::Black);
+    squares[whiteBackRow][0] = squares[whiteBackRow][7] = Piece(PieceType::Rook, PieceColor::White);
+    squares[blackBackRow][0] = squares[blackBackRow][7] = Piece(PieceType::Rook, PieceColor::Black);
 
     // Knights
-    squares[0][1] = squares[0][6] = Piece(PieceType::Knight, PieceColor::White);
-    squares[7][1] = squares[7][6] = Piece(PieceType::Knight, PieceColor::Black);
+    squares[whiteBackRow][1] = squares[whiteBackRow][6] = Piece(PieceType::Knight, PieceColor::White);
+    squares[blackBackRow][1] = squares[blackBackRow][6] = Piece(PieceType::Knight, PieceColor::Black);
 
     // Bishops
-    squares[0][2] = squares[0][5] = Piece(PieceType::Bishop, PieceColor::White);
-    squares[7][2] = squares[7][5] = Piece(PieceType::Bishop, PieceColor::Black);
+    squares[whiteBackRow][2] = squares[whiteBackRow][5] = Piece(PieceType::Bishop, PieceColor::White);
+    squares[blackBackRow][2] = squares[blackBackRow][5] = Piece(PieceType::Bishop, PieceColor::Black);
 
     // Queens
-    squares[0][3] = Piece(PieceType::Queen, PieceColor::White);
-    squares[7][3] = Piece(PieceType::Queen, PieceColor::Black);
+    squares[whiteBackRow][3] = Piece(PieceType::Queen, PieceColor::White);
+    squares[blackBackRow][3] = Piece(PieceType::Queen, PieceColor::Black);
 
     // Kings
-    squares[0][4] = Piece(PieceType::King, PieceColor::White);
-    squares[7][4] = Piece(PieceType::King, PieceColor::Black);
+    squares[whiteBackRow][4] = Piece(PieceType::King, PieceColor::White);
+    squares[blackBackRow][4] = Piece(PieceType::King, PieceColor::Black);
+
+    whiteKingMoved = false;
+    blackKingMoved = false;
+    whiteQueenSideRookMoved = false;
+    whiteKingSideRookMoved = false;
+    blackQueenSideRookMoved = false;
+    blackKingSideRookMoved = false;
 }
 
 void Board::print() const {
-    for (int row = 7; row >= 0; row--) {
-        for (int col = 0; col < 8; col++) {
+    for (int row = getRowCount() - 1; row >= 0; row--) {
+        for (int col = 0; col < getColCount(); col++) {
             cout << static_cast<int>(squares[row][col].type) << " ";
         }
         cout << endl;
@@ -74,20 +112,16 @@ void Board::print() const {
 
 std::vector<Move> Board::getMovesForPiece(int row, int col) const {
     std::vector<Move> moves;
-    
-    // Check if position is valid
-    if (row < 0 || row >= 8 || col < 0 || col >= 8) {
+
+    if (row < 0 || row >= getRowCount() || col < 0 || col >= getColCount()) {
         return moves;
     }
-    
+
     Piece piece = squares[row][col];
-    
-    // Check if there is a piece at this position
     if (piece.type == PieceType::None) {
         return moves;
     }
-    
-    // Generate moves based on piece type
+
     switch (piece.type) {
         case PieceType::Pawn:
             moves = generatePawnMoves(*this, row, col);
@@ -107,27 +141,38 @@ std::vector<Move> Board::getMovesForPiece(int row, int col) const {
         case PieceType::King:
             moves = generateKingMoves(*this, row, col);
             break;
+        case PieceType::Custom: {
+            auto it = customMoveGenerators.find(piece.customTypeId);
+            if (it != customMoveGenerators.end()) {
+                moves = it->second(*this, row, col);
+            }
+            break;
+        }
         default:
             break;
     }
-    
+
     return moves;
 }
 
 std::vector<Move> Board::generateAllMoves(PieceColor side) const {
-    std::vector<Move> Allmoves;
-    for (int row = 0; row < 8; row++) {
-        for (int col = 0; col < 8; col++) {
+    std::vector<Move> allMoves;
+    for (int row = 0; row < getRowCount(); row++) {
+        for (int col = 0; col < getColCount(); col++) {
             if (squares[row][col].color == side) {
                 auto pieceMoves = getMovesForPiece(row, col);
-                Allmoves.insert(Allmoves.end(), pieceMoves.begin(), pieceMoves.end());
+                allMoves.insert(allMoves.end(), pieceMoves.begin(), pieceMoves.end());
             }
         }
     }
-    return Allmoves;
+    return allMoves;
 }
 
-void Board::makeMove(const Move &move) {
+void Board::makeMove(const Move& move) {
+    if (move.fromRow < 0 || move.fromRow >= getRowCount() ||
+        move.fromCol < 0 || move.fromCol >= getColCount()) {
+        return;
+    }
 
     for (const auto& m : generateAllMoves(squares[move.fromRow][move.fromCol].color)) {
         if (m == move) {
@@ -136,33 +181,42 @@ void Board::makeMove(const Move &move) {
         }
     }
 
-    cout << "Invalid move: From (" << alphabetToChar(static_cast<alphabet>(move.fromCol)) << move.fromRow+1
-         << ") To ("  << alphabetToChar(static_cast<alphabet>(move.toCol)) << move.toRow+1 << ")\n";
-    
-    
+    if (move.fromCol >= 0 && move.fromCol < 8 && move.toCol >= 0 && move.toCol < 8) {
+        cout << "Invalid move: From (" << alphabetToChar(static_cast<alphabet>(move.fromCol)) << move.fromRow + 1
+             << ") To (" << alphabetToChar(static_cast<alphabet>(move.toCol)) << move.toRow + 1 << ")\n";
+    } else {
+        cout << "Invalid move\n";
+    }
 }
 
-void Board::showMoves(const std::vector<Move>& moves) const{
+void Board::showMoves(const std::vector<Move>& moves) const {
     for (const auto& move : moves) {
-        std::cout << "From: (" <<  alphabetToChar(static_cast<alphabet>(move.fromCol)) << move.fromRow+1
-        << ") To: ("  << alphabetToChar(static_cast<alphabet>(move.toCol)) << move.toRow+1 << ")\n";
+        if (move.fromCol >= 0 && move.fromCol < 8 && move.toCol >= 0 && move.toCol < 8) {
+            std::cout << "From: (" << alphabetToChar(static_cast<alphabet>(move.fromCol)) << move.fromRow + 1
+                      << ") To: (" << alphabetToChar(static_cast<alphabet>(move.toCol)) << move.toRow + 1 << ")\n";
+        } else {
+            std::cout << "From: (" << move.fromRow << "," << move.fromCol << ") To: (" << move.toRow << "," << move.toCol << ")\n";
+        }
     }
 }
 
 Piece Board::getSquare(int row, int col) const {
+    if (row < 0 || row >= getRowCount() || col < 0 || col >= getColCount()) {
+        return Piece();
+    }
     return squares[row][col];
 }
 
 void Board::setSquare(int row, int col, const Piece& piece) {
-    if (row < 0 || row >= 8 || col < 0 || col >= 8) {
+    if (row < 0 || row >= getRowCount() || col < 0 || col >= getColCount()) {
         return;
     }
     squares[row][col] = piece;
 }
 
 void Board::clearBoard() {
-    for (int row = 0; row < 8; row++) {
-        for (int col = 0; col < 8; col++) {
+    for (int row = 0; row < getRowCount(); row++) {
+        for (int col = 0; col < getColCount(); col++) {
             squares[row][col] = Piece();
         }
     }
@@ -176,19 +230,42 @@ void Board::clearBoard() {
     blackKingSideRookMoved = true;
 }
 
+int Board::getRowCount() const {
+    return static_cast<int>(squares.size());
+}
+
+int Board::getColCount() const {
+    return getRowCount() > 0 ? static_cast<int>(squares[0].size()) : 0;
+}
+
+char Board::getTileType(int row, int col) const {
+    if (row < 0 || row >= getRowCount() || col < 0 || col >= getColCount()) {
+        return '.';
+    }
+    return tiles[row][col];
+}
+
+void Board::setTileType(int row, int col, char tile) {
+    if (row < 0 || row >= getRowCount() || col < 0 || col >= getColCount()) {
+        return;
+    }
+    tiles[row][col] = tile;
+}
+
 bool Board::isSquareUnderAttack(int row, int col, PieceColor byColor) const {
-    // This helper checks pseudo-attacks by piece patterns to answer
-    // "is this square controlled by the given side?".
+    int maxRows = getRowCount();
+    int maxCols = getColCount();
+
     int pawnDirection = (byColor == PieceColor::White) ? 1 : -1;
     int pawnRow = row - pawnDirection;
-    if (pawnRow >= 0 && pawnRow < 8) {
+    if (pawnRow >= 0 && pawnRow < maxRows) {
         if (col - 1 >= 0) {
             Piece leftPawn = squares[pawnRow][col - 1];
             if (leftPawn.type == PieceType::Pawn && leftPawn.color == byColor) {
                 return true;
             }
         }
-        if (col + 1 < 8) {
+        if (col + 1 < maxCols) {
             Piece rightPawn = squares[pawnRow][col + 1];
             if (rightPawn.type == PieceType::Pawn && rightPawn.color == byColor) {
                 return true;
@@ -203,7 +280,7 @@ bool Board::isSquareUnderAttack(int row, int col, PieceColor byColor) const {
     for (const auto& offset : knightOffsets) {
         int r = row + offset[0];
         int c = col + offset[1];
-        if (r >= 0 && r < 8 && c >= 0 && c < 8) {
+        if (r >= 0 && r < maxRows && c >= 0 && c < maxCols) {
             Piece piece = squares[r][c];
             if (piece.type == PieceType::Knight && piece.color == byColor) {
                 return true;
@@ -217,7 +294,7 @@ bool Board::isSquareUnderAttack(int row, int col, PieceColor byColor) const {
     for (const auto& direction : bishopDirections) {
         int r = row + direction[0];
         int c = col + direction[1];
-        while (r >= 0 && r < 8 && c >= 0 && c < 8) {
+        while (r >= 0 && r < maxRows && c >= 0 && c < maxCols) {
             Piece piece = squares[r][c];
             if (piece.type != PieceType::None) {
                 if (piece.color == byColor &&
@@ -237,7 +314,7 @@ bool Board::isSquareUnderAttack(int row, int col, PieceColor byColor) const {
     for (const auto& direction : rookDirections) {
         int r = row + direction[0];
         int c = col + direction[1];
-        while (r >= 0 && r < 8 && c >= 0 && c < 8) {
+        while (r >= 0 && r < maxRows && c >= 0 && c < maxCols) {
             Piece piece = squares[r][c];
             if (piece.type != PieceType::None) {
                 if (piece.color == byColor &&
@@ -258,7 +335,7 @@ bool Board::isSquareUnderAttack(int row, int col, PieceColor byColor) const {
             }
             int r = row + dr;
             int c = col + dc;
-            if (r >= 0 && r < 8 && c >= 0 && c < 8) {
+            if (r >= 0 && r < maxRows && c >= 0 && c < maxCols) {
                 Piece piece = squares[r][c];
                 if (piece.type == PieceType::King && piece.color == byColor) {
                     return true;
@@ -271,8 +348,8 @@ bool Board::isSquareUnderAttack(int row, int col, PieceColor byColor) const {
 }
 
 bool Board::isKingInCheck(PieceColor color) const {
-    for (int row = 0; row < 8; row++) {
-        for (int col = 0; col < 8; col++) {
+    for (int row = 0; row < getRowCount(); row++) {
+        for (int col = 0; col < getColCount(); col++) {
             Piece piece = squares[row][col];
             if (piece.type == PieceType::King && piece.color == color) {
                 return isSquareUnderAttack(row, col, oppositeColor(color));
@@ -291,13 +368,16 @@ bool Board::isCheckmate(PieceColor color) const {
 }
 
 bool Board::wouldLeaveKingInCheck(const Move& move, PieceColor movingSide) const {
-    // Validate candidate moves by simulation on a board copy.
     Board copy = *this;
     copy.applyMoveUnchecked(move);
     return copy.isKingInCheck(movingSide);
 }
 
 bool Board::canCastleKingSide(PieceColor color) const {
+    if (getRowCount() != 8 || getColCount() != 8) {
+        return false;
+    }
+
     int row = (color == PieceColor::White) ? 0 : 7;
     Piece king = squares[row][4];
     Piece rook = squares[row][7];
@@ -325,6 +405,10 @@ bool Board::canCastleKingSide(PieceColor color) const {
 }
 
 bool Board::canCastleQueenSide(PieceColor color) const {
+    if (getRowCount() != 8 || getColCount() != 8) {
+        return false;
+    }
+
     int row = (color == PieceColor::White) ? 0 : 7;
     Piece king = squares[row][4];
     Piece rook = squares[row][0];
@@ -354,15 +438,14 @@ bool Board::canCastleQueenSide(PieceColor color) const {
 }
 
 void Board::applyMoveUnchecked(const Move& move) {
-    // Internal move application used after move validity has already been checked.
     Piece movingPiece = squares[move.fromRow][move.fromCol];
     Piece capturedPiece = squares[move.toRow][move.toCol];
 
     if (capturedPiece.type == PieceType::Rook) {
         if (move.toRow == 0 && move.toCol == 0) whiteQueenSideRookMoved = true;
         if (move.toRow == 0 && move.toCol == 7) whiteKingSideRookMoved = true;
-        if (move.toRow == 7 && move.toCol == 0) blackQueenSideRookMoved = true;
-        if (move.toRow == 7 && move.toCol == 7) blackKingSideRookMoved = true;
+        if (move.toRow == getRowCount() - 1 && move.toCol == 0) blackQueenSideRookMoved = true;
+        if (move.toRow == getRowCount() - 1 && move.toCol == 7) blackKingSideRookMoved = true;
     }
 
     if (movingPiece.type == PieceType::Pawn &&
@@ -374,7 +457,7 @@ void Board::applyMoveUnchecked(const Move& move) {
         squares[capturedPawnRow][move.toCol] = Piece();
     }
 
-    if (movingPiece.type == PieceType::King && std::abs(move.toCol - move.fromCol) == 2) {
+    if (movingPiece.type == PieceType::King && std::abs(move.toCol - move.fromCol) == 2 && getColCount() == 8) {
         if (move.toCol == 6) {
             squares[move.toRow][5] = squares[move.toRow][7];
             squares[move.toRow][7] = Piece();
@@ -388,7 +471,7 @@ void Board::applyMoveUnchecked(const Move& move) {
     squares[move.fromRow][move.fromCol] = Piece();
 
     if (movingPiece.type == PieceType::Pawn) {
-        if ((movingPiece.color == PieceColor::White && move.toRow == 7) ||
+        if ((movingPiece.color == PieceColor::White && move.toRow == getRowCount() - 1) ||
             (movingPiece.color == PieceColor::Black && move.toRow == 0)) {
             squares[move.toRow][move.toCol] = Piece(PieceType::Queen, movingPiece.color);
         }
@@ -405,8 +488,8 @@ void Board::applyMoveUnchecked(const Move& move) {
     if (movingPiece.type == PieceType::Rook) {
         if (move.fromRow == 0 && move.fromCol == 0) whiteQueenSideRookMoved = true;
         if (move.fromRow == 0 && move.fromCol == 7) whiteKingSideRookMoved = true;
-        if (move.fromRow == 7 && move.fromCol == 0) blackQueenSideRookMoved = true;
-        if (move.fromRow == 7 && move.fromCol == 7) blackKingSideRookMoved = true;
+        if (move.fromRow == getRowCount() - 1 && move.fromCol == 0) blackQueenSideRookMoved = true;
+        if (move.fromRow == getRowCount() - 1 && move.fromCol == 7) blackKingSideRookMoved = true;
     }
 
     if (movingPiece.type == PieceType::Pawn && std::abs(move.toRow - move.fromRow) == 2) {
@@ -424,4 +507,8 @@ int Board::getEnPassantTargetRow() const {
 
 int Board::getEnPassantTargetCol() const {
     return enPassantTargetCol;
+}
+
+void Board::registerCustomPieceMoveset(const std::string& customTypeId, std::function<std::vector<Move>(const Board&, int, int)> generator) {
+    customMoveGenerators[customTypeId] = std::move(generator);
 }

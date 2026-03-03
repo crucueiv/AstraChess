@@ -16,12 +16,14 @@ std::vector<Move> generateKnightMoves(const Board& board, int row, int col) {
         {2, 1}, {2, -1}, {-2, 1}, {-2, -1},
         {1, 2}, {1, -2}, {-1, 2}, {-1, -2}
     }};
+    int maxRows = board.getRowCount();
+    int maxCols = board.getColCount();
 
     for (const auto& move : knightMoves) {
         int newRow = row + move.first;
         int newCol = col + move.second;
 
-        if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
+        if (newRow >= 0 && newRow < maxRows && newCol >= 0 && newCol < maxCols) {
             Piece targetPiece = board.getSquare(newRow, newCol);
             if (targetPiece.color != piece.color) {
                 Move move(row, col, newRow, newCol);
