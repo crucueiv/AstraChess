@@ -9,6 +9,7 @@
 #include "pieceMoveset/bishop/bishopMoveset.h"
 #include "pieceMoveset/knight/knightMoveset.h"
 #include "pieceMoveset/queen/queenMoveset.h"
+#include "pieceMoveset/king/kingMoveset.h"
 #include <iostream>
 #include <cmath>
 using namespace std;
@@ -101,7 +102,7 @@ std::vector<Move> Board::getMovesForPiece(int row, int col) const {
             moves = generateQueenMoves(*this, row, col);
             break;
         case PieceType::King:
-            //moves = generateKingMoves(*this, row, col);
+            moves = generateKingMoves(*this, row, col);
             break;
         default:
             break;
