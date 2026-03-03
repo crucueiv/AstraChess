@@ -16,12 +16,14 @@ std::vector<Move> generateRookMoves(const Board& board, int row, int col) {
     std::array<std::pair<int, int>, 4> directions = {{
         {1, 0}, {-1, 0}, {0, -1}, {0, 1}
     }};
+    int maxRows = board.getRowCount();
+    int maxCols = board.getColCount();
 
     for (const auto& dir : directions) {
         int newRow = row + dir.first;
         int newCol = col + dir.second;
 
-        while (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
+        while (newRow >= 0 && newRow < maxRows && newCol >= 0 && newCol < maxCols) {
             Piece targetPiece = board.getSquare(newRow, newCol);
             if (targetPiece.type == PieceType::None) {
                 Move move(row, col, newRow, newCol);

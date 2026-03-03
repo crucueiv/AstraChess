@@ -14,9 +14,11 @@ std::vector<Move> generatePawnMoves(const Board& board, int row, int col) {
 
     int direction = (piece.color == PieceColor::White) ? 1 : -1;
     int nextRow = row + direction;
+    int maxRows = board.getRowCount();
+    int maxCols = board.getColCount();
 
     // Moving one square forward
-    if (nextRow >= 0 && nextRow < 8) {
+    if (nextRow >= 0 && nextRow < maxRows) {
         if (board.getSquare(nextRow, col).type == PieceType::None) {
             Move move(row, col, nextRow, col);
             if (!board.wouldLeaveKingInCheck(move, piece.color)) {
@@ -25,10 +27,10 @@ std::vector<Move> generatePawnMoves(const Board& board, int row, int col) {
         }
         
         // First move, two squares forward (only if one-square path is clear)
-        int startRow = (piece.color == PieceColor::White) ? 1 : 6;
+        int startRow = (piece.color == PieceColor::White) ? 1 : maxRows - 2;
         if (row == startRow) {
             int twoStepRow = row + 2 * direction;
-            if (twoStepRow >= 0 && twoStepRow < 8 &&
+            if (twoStepRow >= 0 && twoStepRow < maxRows &&
                 board.getSquare(twoStepRow, col).type == PieceType::None) {
                 Move twoStep(row, col, twoStepRow, col);
                 if (!board.wouldLeaveKingInCheck(twoStep, piece.color)) {
@@ -40,14 +42,14 @@ std::vector<Move> generatePawnMoves(const Board& board, int row, int col) {
 
     // Check diagonals for capture
     int captureRow = row + direction;
-    if (captureRow >= 0 && captureRow < 8) {
+    if (captureRow >= 0 && captureRow < maxRows) {
         if (col - 1 >= 0 && board.getSquare(captureRow, col-1).color != piece.color && board.getSquare(captureRow, col-1).color != PieceColor::None) {
             Move move(row, col, captureRow, col-1);
             if (!board.wouldLeaveKingInCheck(move, piece.color)) {
                 moves.push_back(move);
             }
         }
-        if (col + 1 < 8 && board.getSquare(captureRow, col+1).color != piece.color && board.getSquare(captureRow, col+1).color != PieceColor::None) {
+        if (col + 1 < maxCols && board.getSquare(captureRow, col+1).color != piece.color && board.getSquare(captureRow, col+1).color != PieceColor::None) {
             Move move(row, col, captureRow, col+1);
             if (!board.wouldLeaveKingInCheck(move, piece.color)) {
                 moves.push_back(move);

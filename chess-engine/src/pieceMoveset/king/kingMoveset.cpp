@@ -11,6 +11,8 @@ std::vector<Move> generateKingMoves(const Board& board, int row, int col) {
     if (piece.type != PieceType::King) {
         return moves;
     }
+    int maxRows = board.getRowCount();
+    int maxCols = board.getColCount();
 
     for (int dr = -1; dr <= 1; dr++) {
         for (int dc = -1; dc <= 1; dc++) {
@@ -20,7 +22,7 @@ std::vector<Move> generateKingMoves(const Board& board, int row, int col) {
 
             int targetRow = row + dr;
             int targetCol = col + dc;
-            if (targetRow < 0 || targetRow >= 8 || targetCol < 0 || targetCol >= 8) {
+            if (targetRow < 0 || targetRow >= maxRows || targetCol < 0 || targetCol >= maxCols) {
                 continue;
             }
 

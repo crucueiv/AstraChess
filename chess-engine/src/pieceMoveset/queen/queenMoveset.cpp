@@ -16,12 +16,14 @@ std::vector<Move> generateQueenMoves(const Board& board, int row, int col) {
         {1, 0}, {-1, 0}, {0, 1}, {0, -1},
         {1, 1}, {1, -1}, {-1, 1}, {-1, -1}
     };
+    int maxRows = board.getRowCount();
+    int maxCols = board.getColCount();
 
     for (const auto& direction : directions) {
         int r = row + direction[0];
         int c = col + direction[1];
 
-        while (r >= 0 && r < 8 && c >= 0 && c < 8) {
+        while (r >= 0 && r < maxRows && c >= 0 && c < maxCols) {
             Piece targetPiece = board.getSquare(r, c);
             if (targetPiece.color == piece.color) {
                 break;

@@ -138,3 +138,46 @@ TEST(Promotion, PawnPromotesToQueen) {
     EXPECT_EQ(promoted.type, PieceType::Queen);
     EXPECT_EQ(promoted.color, PieceColor::White);
 }
+
+TEST(Modularity, SupportsCustomBoardDimensionsAndTiles) {
+    BoardConfig config;
+    config.rows = 10;
+    config.cols = 10;
+    config.tileLayout = std::vector<std::vector<TileType>>(10, std::vector<TileType>(10, TileType::Default));
+    config.tileLayout[0][0] = TileType::Empty;
+
+    Board board(config);
+    board.clearBoard();
+    EXPECT_EQ(board.getRowCount(), 10);
+    EXPECT_EQ(board.getColCount(), 10);
+    EXPECT_EQ(board.getTileType(0, 0), TileType::Empty);
+    EXPECT_EQ(board.getTileType(5, 5), TileType::Default);
+}
+
+TEST(Modularity, SupportsCustomPieceMoveGeneratorRegistration) {
+    Board board;
+    board.clearBoard();
+    board.setSquare(0, 4, Piece(PieceType::King, PieceColor::White));
+    board.setSquare(7, 4, Piece(PieceType::King, PieceColor::Black));
+    board.setSquare(4, 4, Piece(PieceType::Custom, PieceColor::White, "Camel"));
+
+    board.registerCustomPieceMoveset("Camel", [](const Board& b, int row, int col) {
+        std::vector<Move> moves;
+        int targetRow = row + 3;
+        int targetCol = col + 1;
+        if (targetRow < b.getRowCount() && targetCol < b.getColCount()) {
+            Piece target = b.getSquare(targetRow, targetCol);
+            Piece source = b.getSquare(row, col);
+            if (target.color != source.color) {
+                Move move(row, col, targetRow, targetCol);
+                if (!b.wouldLeaveKingInCheck(move, source.color)) {
+                    moves.push_back(move);
+                }
+            }
+        }
+        return moves;
+    });
+
+    auto moves = board.getMovesForPiece(4, 4);
+    EXPECT_TRUE(hasMove(moves, 4, 4, 7, 5));
+}

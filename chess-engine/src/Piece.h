@@ -5,6 +5,8 @@
 #ifndef ASTRACHESS_PIECE_H
 #define ASTRACHESS_PIECE_H
 #pragma once
+#include <string>
+#include <utility>
 
 enum class PieceType {
     None,
@@ -13,7 +15,8 @@ enum class PieceType {
     Bishop,
     Rook,
     Queen,
-    King
+    King,
+    Custom
 };
 
 enum class PieceColor {
@@ -25,8 +28,9 @@ enum class PieceColor {
 struct Piece {
     PieceType type;
     PieceColor color;
-    Piece(PieceType t = PieceType::None, PieceColor c = PieceColor::None):
-    type(t), color(c) {}
+    std::string customTypeId;
+    Piece(PieceType t = PieceType::None, PieceColor c = PieceColor::None, std::string customId = ""):
+    type(t), color(c), customTypeId(std::move(customId)) {}
 };
 
 #endif //ASTRACHESS_PIECE_H

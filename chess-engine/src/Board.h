@@ -6,14 +6,30 @@
 #define ASTRACHESS_BOARD_H
 #pragma once
 #include "Piece.h"
-#include <array>
+#include "Tiles.h"
+#include <functional>
+#include <string>
+#include <unordered_map>
 #include <vector>
 #include "Move.h"
 
+struct BoardConfig {
+    int rows = 8;
+    int cols = 8;
+    std::vector<std::vector<TileType>> tileLayout;
+};
+
+struct BoardJsonConfig {
+    int rows = 8;
+    int cols = 8;
+    std::vector<std::vector<std::string>> tileLayoutTokens;
+};
 
 class Board {
     public:
         Board();
+        explicit Board(const BoardConfig& config);
+        static BoardConfig fromJsonConfig(const BoardJsonConfig& jsonConfig);
 
         void initialize();
         void print() const;
@@ -23,6 +39,10 @@ class Board {
         Piece getSquare(int row, int col) const;
         void setSquare(int row, int col, const Piece& piece);
         void clearBoard();
+        int getRowCount() const;
+        int getColCount() const;
+        TileType getTileType(int row, int col) const;
+        void setTileType(int row, int col, TileType tile);
         void makeMove(const Move& move);
         void showMoves(const std::vector<Move>& moves) const;
         bool isSquareUnderAttack(int row, int col, PieceColor byColor) const;
@@ -35,9 +55,12 @@ class Board {
         // En passant methods
         int getEnPassantTargetRow() const;
         int getEnPassantTargetCol() const;
+        void registerCustomPieceMoveset(const std::string& customTypeId, std::function<std::vector<Move>(const Board&, int, int)> generator);
 
     private:
-        std::array<std::array<Piece, 8>, 8> squares;
+        std::vector<std::vector<Piece>> squares;
+        std::vector<std::vector<TileType>> tiles;
+        std::unordered_map<std::string, std::function<std::vector<Move>(const Board&, int, int)>> customMoveGenerators;
         int enPassantTargetRow;
         int enPassantTargetCol;
         bool whiteKingMoved;
