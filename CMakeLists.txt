@@ -13,6 +13,7 @@ add_executable(AstraChess
     chess-engine/src/pieceMoveset/knight/knightMoveset.cpp
     chess-engine/src/pieceMoveset/queen/queenMoveset.cpp
     chess-engine/src/pieceMoveset/king/kingMoveset.cpp
+    chess-engine/src/pieceMoveset/rook/rookMoveset.cpp
 )
 
 target_include_directories(AstraChess PRIVATE
