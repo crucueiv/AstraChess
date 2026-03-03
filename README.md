@@ -23,6 +23,8 @@ chess-engine/tests/
 
 ## Build
 
+Requires CMake and a C++ compiler with C++17 support.
+
 ```bash
 cmake -S . -B cmake-build-debug
 cmake --build cmake-build-debug
@@ -61,13 +63,13 @@ Tiles are now strongly typed via `TileType` (currently `Empty` and `Default`), s
 ### 2) Register a custom piece moveset
 
 ```cpp
-board.registerCustomPieceMoveset(\"Camel\", [](const Board& board, int row, int col) {
+board.registerCustomPieceMoveset("Camel", [](const Board& board, int row, int col) {
     std::vector<Move> moves;
     // add your custom movement logic here
     return moves;
 });
 
-board.setSquare(4, 4, Piece(PieceType::Custom, PieceColor::White, \"Camel\"));
+board.setSquare(4, 4, Piece(PieceType::Custom, PieceColor::White, "Camel"));
 auto moves = board.getMovesForPiece(4, 4);
 ```
 
