@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include "Board.h"
 #include "Engine.h"
+#include "Multiplayer.h"
 
 namespace {
 bool hasMove(const std::vector<Move>& moves, int fr, int fc, int tr, int tc) {
@@ -220,4 +221,57 @@ TEST(CustomPiece, EvaluationUsesPerPieceCustomValue) {
 
     EXPECT_EQ(Engine::evaluateBoard(board, PieceColor::White), 500);
     EXPECT_EQ(Engine::evaluateBoard(board, PieceColor::Black), -500);
+}
+
+TEST(Multiplayer, InitialViewHasWhiteTurnAndLegalMoves) {
+    MultiplayerGame game("room-1");
+    MultiplayerGameState state = game.view();
+
+    EXPECT_EQ(state.roomId, "room-1");
+    EXPECT_EQ(state.turn, MultiplayerPlayerSlot::P1);
+    EXPECT_EQ(state.seq, 0);
+    EXPECT_FALSE(state.legalMoves.empty());
+}
+
+TEST(Multiplayer, RejectsMoveFromWrongTurnPlayer) {
+    MultiplayerGame game("room-2");
+    MultiplayerMoveRequest move;
+    move.fromRow = 6;
+    move.fromCol = 4;
+    move.toRow = 5;
+    move.toCol = 4;
+
+    auto result = game.applyMove(MultiplayerPlayerSlot::P2, move);
+    EXPECT_FALSE(result.accepted);
+    EXPECT_EQ(result.errorCode, "UNAUTHORIZED");
+    EXPECT_EQ(result.state.seq, 0);
+    EXPECT_EQ(result.state.turn, MultiplayerPlayerSlot::P1);
+}
+
+TEST(Multiplayer, AcceptsLegalMoveAndAdvancesTurnAndSeq) {
+    MultiplayerGame game("room-3");
+    MultiplayerMoveRequest move;
+    move.fromRow = 1;
+    move.fromCol = 4;
+    move.toRow = 3;
+    move.toCol = 4;
+
+    auto result = game.applyMove(MultiplayerPlayerSlot::P1, move);
+    EXPECT_TRUE(result.accepted);
+    EXPECT_EQ(result.state.seq, 1);
+    EXPECT_EQ(result.state.turn, MultiplayerPlayerSlot::P2);
+}
+
+TEST(Multiplayer, RejectsIllegalMoveWithInvalidMoveCode) {
+    MultiplayerGame game("room-4");
+    MultiplayerMoveRequest move;
+    move.fromRow = 0;
+    move.fromCol = 4;
+    move.toRow = 4;
+    move.toCol = 4;
+
+    auto result = game.applyMove(MultiplayerPlayerSlot::P1, move);
+    EXPECT_FALSE(result.accepted);
+    EXPECT_EQ(result.errorCode, "INVALID_MOVE");
+    EXPECT_EQ(result.state.seq, 0);
 }

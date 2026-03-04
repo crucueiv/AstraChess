@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 14)
 set(CHESS_ENGINE_SOURCES
     chess-engine/src/Board.cpp
     chess-engine/src/Engine.cpp
+    chess-engine/src/Multiplayer.cpp
     chess-engine/src/Move.cpp
     chess-engine/src/pieceMoveset/pawn/pawnMoveset.cpp
     chess-engine/src/pieceMoveset/bishop/bishopMoveset.cpp

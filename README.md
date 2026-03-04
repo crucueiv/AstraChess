@@ -14,6 +14,7 @@ AstraChess is a C++ chess engine focused on move generation, legality checks, an
 ```text
 chess-engine/src/
   Board.h / Board.cpp                 # board state + rule application
+  Multiplayer.h / Multiplayer.cpp     # server-authoritative multiplayer contract facade
   Piece.h                             # piece definitions
   Move.h                              # move model
   pieceMoveset/<piece>/...            # per-piece move generation
@@ -76,6 +77,18 @@ auto moves = board.getMovesForPiece(4, 4);
 Custom pieces must define an evaluation value in the range **101..899** (strictly above Pawn=100 and below Queen=900).
 
 Classic chess remains the default by calling `Board board;`.
+
+## Multiplayer integration prep (`arcade-link` compatible contract)
+
+`MultiplayerGame` in `chess-engine/src/Multiplayer.h` provides a transport-neutral facade intended for a separate Cloudflare Worker + Durable Objects backend:
+
+- deterministic room state snapshots (`MultiplayerGameState`)
+- validated move application (`applyMove`) with explicit protocol-like error codes (`UNAUTHORIZED`, `INVALID_MOVE`, `ROOM_NOT_READY`)
+- turn/sequence management (`P1`/`P2`, `seq`) aligned with room-based multiplayer flows
+
+Recommended deployment split:
+- this repository: chess rules + multiplayer contract facade
+- separate backend repository: `arcade-link` Durable Object runtime, HTTP routes, WebSocket handling
 
 ## Contributor guide
 
