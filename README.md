@@ -69,9 +69,11 @@ board.registerCustomPieceMoveset("Camel", [](const Board& board, int row, int co
     return moves;
 });
 
-board.setSquare(4, 4, Piece(PieceType::Custom, PieceColor::White, "Camel"));
+board.setSquare(4, 4, Piece(PieceType::Custom, PieceColor::White, "Camel", 350));
 auto moves = board.getMovesForPiece(4, 4);
 ```
+
+Custom pieces must define an evaluation value in the range **101..899** (strictly above Pawn=100 and below Queen=900).
 
 Classic chess remains the default by calling `Board board;`.
 

@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include "Board.h"
+#include "Engine.h"
 
 namespace {
 bool hasMove(const std::vector<Move>& moves, int fr, int fc, int tr, int tc) {
@@ -159,7 +160,7 @@ TEST(Modularity, SupportsCustomPieceMoveGeneratorRegistration) {
     board.clearBoard();
     board.setSquare(0, 4, Piece(PieceType::King, PieceColor::White));
     board.setSquare(7, 4, Piece(PieceType::King, PieceColor::Black));
-    board.setSquare(4, 4, Piece(PieceType::Custom, PieceColor::White, "Camel"));
+    board.setSquare(4, 4, Piece(PieceType::Custom, PieceColor::White, "Camel", 350));
 
     board.registerCustomPieceMoveset("Camel", [](const Board& b, int row, int col) {
         std::vector<Move> moves;
@@ -180,4 +181,43 @@ TEST(Modularity, SupportsCustomPieceMoveGeneratorRegistration) {
 
     auto moves = board.getMovesForPiece(4, 4);
     EXPECT_TRUE(hasMove(moves, 4, 4, 7, 5));
+}
+
+TEST(AI, DifficultyDepthMappingIncreasesWithHardness) {
+    EXPECT_LT(Engine::getDepthForDifficulty(AIDifficulty::Easy),
+              Engine::getDepthForDifficulty(AIDifficulty::Medium));
+    EXPECT_LT(Engine::getDepthForDifficulty(AIDifficulty::Medium),
+              Engine::getDepthForDifficulty(AIDifficulty::Hard));
+}
+
+TEST(AI, PrefersCapturingHigherValuePiece) {
+    Board board;
+    board.clearBoard();
+    board.setSquare(0, 4, Piece(PieceType::King, PieceColor::White));
+    board.setSquare(7, 4, Piece(PieceType::King, PieceColor::Black));
+    board.setSquare(3, 3, Piece(PieceType::Queen, PieceColor::White));
+    board.setSquare(3, 6, Piece(PieceType::Rook, PieceColor::Black));
+
+    Move best = Engine::findBestMove(board, PieceColor::White, AIDifficulty::Hard);
+    EXPECT_EQ(best.fromRow, 3);
+    EXPECT_EQ(best.fromCol, 3);
+    EXPECT_EQ(best.toRow, 3);
+    EXPECT_EQ(best.toCol, 6);
+}
+
+TEST(CustomPiece, RejectsValueOutsideAllowedRange) {
+    EXPECT_THROW(Piece(PieceType::Custom, PieceColor::White, "BadLow", 100), std::invalid_argument);
+    EXPECT_THROW(Piece(PieceType::Custom, PieceColor::White, "BadHigh", 900), std::invalid_argument);
+}
+
+TEST(CustomPiece, EvaluationUsesPerPieceCustomValue) {
+    Board board;
+    board.clearBoard();
+    board.setSquare(0, 4, Piece(PieceType::King, PieceColor::White));
+    board.setSquare(7, 4, Piece(PieceType::King, PieceColor::Black));
+    board.setSquare(3, 3, Piece(PieceType::Custom, PieceColor::White, "Camel", 700));
+    board.setSquare(4, 4, Piece(PieceType::Custom, PieceColor::Black, "Falcon", 200));
+
+    EXPECT_EQ(Engine::evaluateBoard(board, PieceColor::White), 500);
+    EXPECT_EQ(Engine::evaluateBoard(board, PieceColor::Black), -500);
 }
