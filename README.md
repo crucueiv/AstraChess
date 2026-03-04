@@ -43,6 +43,15 @@ ctest --test-dir cmake-build-debug --output-on-failure
 - Wire moveset usage through `Board::getMovesForPiece`
 - Add tests in `chess-engine/tests/board_rules_test.cpp`
 
+## Single-player AI
+
+`Engine` now includes:
+
+- minimax search
+- alpha-beta pruning
+- material heuristic evaluation
+- variable-depth difficulty (`Easy`, `Medium`, `Hard`)
+
 ## Modular extension API (W.I.P)
 
 ### 1) Create a custom board size/layout
