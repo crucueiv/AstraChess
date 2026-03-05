@@ -24,6 +24,11 @@ target_include_directories(AstraChessEngine PUBLIC
 add_executable(AstraChess chess-engine/src/main.cpp)
 target_link_libraries(AstraChess PRIVATE AstraChessEngine)
 
+add_executable(AstraChessMinimalServer
+    chess-engine/src/minimalserverc++formultiplayerimplementation/mainserver.cpp
+)
+target_link_libraries(AstraChessMinimalServer PRIVATE AstraChessEngine)
+
 include(FetchContent)
 FetchContent_Declare(
     googletest

@@ -16,3 +16,5 @@
 /_codeql_detected_source_root
 # Old IDEA project files
 /.idea/
+# Multiplayer libs, to be downloaded by the user who tries to use this
+/chess-engine/src/minimalserverc++formultiplayerimplementation/multiplayernecesarylibs/

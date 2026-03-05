@@ -37,6 +37,28 @@ cmake --build cmake-build-debug
 ctest --test-dir cmake-build-debug --output-on-failure
 ```
 
+## Minimal multiplayer HTTP server
+
+There is a dedicated server entrypoint at:
+`chess-engine/src/minimalserverc++formultiplayerimplementation/mainserver.cpp`.
+
+Build only this server target:
+
+```bash
+cmake -S . -B cmake-build-debug
+cmake --build cmake-build-debug --target AstraChessMinimalServer
+```
+
+Run it:
+
+```bash
+./cmake-build-debug/AstraChessMinimalServer
+```
+
+The server listens on `http://localhost:8081` and exposes `POST /moves/validate`.
+Typical response fields include:
+`accepted`, `nextState`, `legalMoves`, `finished`, and error metadata (`code`, `message`) when rejected.
+
 ## Extending the engine (today)
 
 - Add/update piece move logic in `chess-engine/src/pieceMoveset/`
